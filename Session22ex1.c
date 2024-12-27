@@ -1,392 +1,220 @@
+
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 
-struct Student {
+typedef struct
+{
     int id;
     char name[100];
     int age;
-    char phoneNumber[100];
-};
-void showStudent(struct Student student[], int *count);
-void addStudent(struct Student student[], int *count,struct Student newStudent);
-int idCheck(struct Student student[], int *count,struct Student newStudent);
-void updateStudent(struct Student student[], int *count,struct Student newStudent,int choice,int index);
-void deleteStudent(struct Student student[], int *count,int index);
-void searchStudent(struct Student student[], int *count,int choice,struct Student findStudent);
-void sortStudent(struct Student student[], int *count, int choice);
-int main(){
-    int choice,index;
-    char searchName[100];
-    char searchPhoneNumber[100];
-    struct Student student[5] = 
+} Student;
+
+void loadStudents(Student students[], int *size, FILE *file);
+void saveStudents(Student students[], int size, FILE *file);
+void displayStudents(Student students[], int size);
+void addStudent(Student students[], int *size, FILE *file);
+void editStudent(Student students[], int size, FILE *file);
+void deleteStudent(Student students[], int *size, FILE *file);
+void searchStudent(Student students[], int size);
+void sortStudents(Student students[], int size);
+
+int main()
+{
+    Student students[100];
+    int size = 0;
+    int choice;
+    FILE *file = fopen("students.bin", "rb");
+    if (file != NULL)
     {
-       {1,"Hoang Van Luong",18,"0367771862"},
-        {2,"Hoang Van Luong",19,"0367771862"},
-        {3,"Hoang Van Luong",20,"00367771862"},
-        {4,"Hoang Van Luong",21,"0367771862"},
-        {5,"Hoang Van Luong",21,"0367771862"},
-    }; 
-    struct Student newStudent;
-    struct Student findStudent;
-    int count = 5;
+        loadStudents(students, &size, file);
+        fclose(file);
+    }
+
     do
     {
-        printf("__________________________________________________\n");
-        printf("                        Menu\n");
-        printf("1. Hien thi danh sach sinh vien\n");
+        printf("\nMENU\n");
+        printf("1. In danh sach sinh vien\n");
         printf("2. Them sinh vien\n");
         printf("3. Sua thong tin sinh vien\n");
         printf("4. Xoa sinh vien\n");
         printf("5. Tim kiem sinh vien\n");
         printf("6. Sap xep danh sach sinh vien\n");
         printf("7. Thoat\n");
-        printf("Nhap lua chon cua ban : ");
-        scanf("%d",&choice);
-        printf("__________________________________________________\n");
+        printf("Lua chon cua ban: ");
+        scanf("%d", &choice);
+
         switch (choice)
         {
         case 1:
-            showStudent(student,&count);
+            displayStudents(students, size);
             break;
         case 2:
-            do
-            {
-                printf("Nhap ID : ");
-                scanf("%d",&newStudent.id);
-            } while (idCheck(student,&count,newStudent));
-            printf("Nhap ten : ");
-            fflush(stdin);
-            fgets(newStudent.name,sizeof(newStudent.name),stdin);
-            newStudent.name[strcspn(newStudent.name, "\n")] = '\0';
-            printf("Nhap tuoi : ");
-            scanf("%d",&newStudent.age);
-            printf("Nhap so dien thoai : ");
-            fflush(stdin);
-            fgets(newStudent.phoneNumber,sizeof(newStudent.phoneNumber),stdin);
-            newStudent.phoneNumber[strcspn(newStudent.phoneNumber, "\n")] = '\0';
-            addStudent(student,&count,newStudent);
-            showStudent(student,&count);
+            addStudent(students, &size, file);
             break;
         case 3:
-            printf("Nhap vi tri cua sinh vien ban muon sua thong tin : ");
-            scanf("%d",&index);
-            printf("Ban muon sua thong tin nao :\n");
-            printf("1, ID sinh vien\n");
-            printf("2, Ten sinh vien\n");
-            printf("3, Tuoi sinh vien\n");
-            printf("4, So dien thoai cua sinh vien\n");
-            printf("5, Sua tat ca thong tin\n");
-            printf("Nhap lua chon cua ban : ");
-            scanf("%d",&choice);
-            switch (choice)
-            {
-            case 1:
-                printf("Nhap ID : ");
-                scanf("%d",&newStudent.id);
-                updateStudent(student,&count,newStudent,choice,index);
-                showStudent(student,&count);
-                break;
-            case 2:
-                printf("Nhap ten : ");
-                fflush(stdin);
-                fgets(newStudent.name,sizeof(newStudent.name),stdin);
-                newStudent.name[strcspn(newStudent.name, "\n")] = '\0';
-                updateStudent(student,&count,newStudent,choice,index);
-                showStudent(student,&count);
-                break;
-            case 3:
-                printf("Nhap tuoi : ");
-                scanf("%d",&newStudent.age);
-                updateStudent(student,&count,newStudent,choice,index);
-                showStudent(student,&count);
-                break;
-            case 4:
-                printf("Nhap so dien thoai : ");
-                fflush(stdin);
-                fgets(newStudent.phoneNumber,sizeof(newStudent.phoneNumber),stdin);
-                newStudent.phoneNumber[strcspn(newStudent.phoneNumber, "\n")] = '\0';
-                updateStudent(student,&count,newStudent,choice,index);
-                showStudent(student,&count);
-                break;
-            case 5:
-                printf("Nhap ID : ");
-                scanf("%d",&newStudent.id);
-                printf("Nhap ten : ");
-                fflush(stdin);
-                fgets(newStudent.name,sizeof(newStudent.name),stdin);
-                newStudent.name[strcspn(newStudent.name, "\n")] = '\0';
-                printf("Nhap tuoi : ");
-                scanf("%d",&newStudent.age);
-                printf("Nhap so dien thoai : ");
-                fflush(stdin);
-                fgets(newStudent.phoneNumber,sizeof(newStudent.phoneNumber),stdin);
-                newStudent.phoneNumber[strcspn(newStudent.phoneNumber, "\n")] = '\0';
-                updateStudent(student,&count,newStudent,choice,index);
-                showStudent(student,&count);
-                break;
-            default:
-                printf("Khong hop le, nhap lai!\n");
-                break;
-            }
+            editStudent(students, size, file);
             break;
         case 4:
-            printf("Nhap vi tri sinh vien muon xoa : \n");
-            scanf("%d",&index);
-            deleteStudent(student,&count,index);
-            showStudent(student,&count);
+            deleteStudent(students, &size, file);
             break;
         case 5:
-            printf("1, Tim kiem theo ID\n");
-            printf("2, Tim kiem theo ten\n");
-            printf("3, Tim kiem theo tuoi\n");
-            printf("4, Tim kiem theo so dien thoai\n");
-            printf("Nhap lua chon cua ban : ");
-            scanf("%d",&choice);
-            switch (choice)
-            {
-            case 1:
-                printf("Nhap ID : ");
-                scanf("%d",&findStudent.id);
-                searchStudent(student,&count,choice,findStudent);
-                break;
-            case 2:
-                printf("Nhap ten : ");
-                fflush(stdin);
-                fgets(findStudent.name,sizeof(findStudent.name),stdin);
-                findStudent.name[strcspn(findStudent.name, "\n")] = '\0';
-                searchStudent(student,&count,choice,findStudent);
-                break;
-            case 3:
-                printf("Nhap tuoi : ");
-                scanf("%d",&findStudent.age);
-                searchStudent(student,&count,choice,findStudent);
-                break;
-            case 4:
-                printf("Nhap so dien thoai : ");
-                fflush(stdin);
-                fgets(findStudent.phoneNumber,sizeof(findStudent.phoneNumber),stdin);
-                findStudent.phoneNumber[strcspn(findStudent.phoneNumber, "\n")] = '\0';
-                searchStudent(student,&count,choice,findStudent);
-                break;
-            default:
-                printf("Khong hop le, nhap lai!\n");
-                break;
-            }
+            searchStudent(students, size);
             break;
         case 6:
-            printf("1,Sap xep tang dan\n");
-            printf("2,Sap xep giam dan\n");
-            printf("Nhap lua chon cua ban : ");
-            scanf("%d",&choice);
-            switch (choice)
-            {
-            case 1:
-                sortStudent(student,&count,choice);
-                showStudent(student,&count);
-                break;
-            case 2:
-                sortStudent(student,&count,choice);
-                showStudent(student,&count);
-                break;
-            default:
-                printf("Khong hop le, nhap lai!\n");
-                break;
-            }
+            sortStudents(students, size);
+            saveStudents(students, size, file);
             break;
         case 7:
-            printf("Tam biet!!");
+            printf("Thoat chuong trinh.\n");
             break;
-        
         default:
-            printf("Khong hop le, nhap lai!\n");
-            break;
+            printf("Lua chon khong hop le!\n");
         }
     } while (choice != 7);
-}
 
-void showStudent(struct Student student[],int *count){
-    printf("Danh sach sinh vien : \n");
-    for (int i = 0; i < *count; i++)
-    {
-        printf("Thong tin sinh vien thu %d : \n",i+1);
-        printf("ID : %d\n",student[i].id);
-        printf("Ten sinh vien : %s\n",student[i].name);
-        printf("Tuoi : %d\n",student[i].age);
-        printf("So Dien Thoai : %s\n",student[i].phoneNumber);
-        printf("_________________________\n");
-    }   
-}
-
-void addStudent(struct Student student[], int *count,struct Student newStudent){
-    student[(*count)++] = newStudent;
-}
-
-int idCheck(struct Student student[], int *count,struct Student newStudent){
-    for (int i = 0; i < *count; i++)
-    {
-        if (newStudent.id == student[i].id)
-        {
-            printf("ID da ton tai, vui long nhap lai!\n");
-            return 1;
-        }
-    }
     return 0;
 }
 
-void updateStudent(struct Student student[], int *count,struct Student newStudent,int choice,int index){
-    switch (choice)
+void loadStudents(Student students[], int *size, FILE *file)
+{
+    file = fopen("students.bin", "rb");
+    if (file == NULL)
     {
-    case 1:
-        student[index-1].id = newStudent.id; 
-        break;
-    case 2:
-        strcpy(student[index-1].name,newStudent.name);
-        break;
-    case 3:
-        student[index-1].age = newStudent.age;
-        break;
-    case 4:
-        strcpy(student[index-1].phoneNumber, newStudent.phoneNumber);
-        break;
-    case 5:
-        student[index-1].id = newStudent.id;
-        strcpy(student[index-1].name,newStudent.name);
-        student[index-1].age = newStudent.age;
-        strcpy(student[index-1].phoneNumber, newStudent.phoneNumber);
-        break;
+        *size = 0;
+        return;
+    }
+    fread(size, sizeof(int), 1, file);
+    fread(students, sizeof(Student), *size, file);
+    fclose(file);
+}
+
+void saveStudents(Student students[], int size, FILE *file)
+{
+    file = fopen("students.bin", "wb");
+    if (file == NULL)
+    {
+        printf("Khong the mo file de ghi!\n");
+        return;
+    }
+    fwrite(&size, sizeof(int), 1, file);
+    fwrite(students, sizeof(Student), size, file);
+    fclose(file);
+}
+
+void displayStudents(Student students[], int size)
+{
+    if (size == 0)
+    {
+        printf("Danh sach sinh vien rong!\n");
+        return;
+    }
+    printf("Danh sach sinh vien:\n");
+    for (int i = 0; i < size; i++)
+    {
+        printf("ID: %d, Ten: %s, Tuoi: %d\n", students[i].id, students[i].name, students[i].age);
     }
 }
 
-void deleteStudent(struct Student student[], int *count,int index){
-    for (int i = index-1; i < *count; i++)
+void addStudent(Student students[], int *size, FILE *file)
+{
+    if (*size >= 100)
     {
-        student[i] = student[i+1];
+        printf("Danh sach sinh vien da day!\n");
+        return;
     }
-    (*count)--;
+    Student newStudent;
+    printf("Nhap ID: ");
+    scanf("%d", &newStudent.id);
+    getchar();
+    printf("Nhap ten: ");
+    fgets(newStudent.name, sizeof(newStudent.name), stdin);
+    newStudent.name[strcspn(newStudent.name, "\n")] = '\0';
+    printf("Nhap tuoi: ");
+    scanf("%d", &newStudent.age);
+
+    students[*size] = newStudent;
+    (*size)++;
+
+    saveStudents(students, *size, file);
+    printf("Them sinh vien thanh cong!\n");
 }
 
-void searchStudent(struct Student student[], int *count,int choice,struct Student findStudent){
-    int found = 0;
-    char temp[100];
-    switch (choice)
+void editStudent(Student students[], int size, FILE *file)
+{
+    int id;
+    printf("Nhap ID sinh vien can sua: ");
+    scanf("%d", &id);
+    for (int i = 0; i < size; i++)
     {
-        case 1:
-            found = 0;
-            for (int i = 0; i < *count; i++)
-            {
-                if (student[i].id == findStudent.id)
-                {
-                    printf("Thong tin sinh vien thu %d : \n",i+1);
-                    printf("ID : %d\n",student[i].id);
-                    printf("Ten sinh vien : %s\n",student[i].name);
-                    printf("Tuoi : %d\n",student[i].age);
-                    printf("So Dien Thoai : %s\n",student[i].phoneNumber);
-                    found = 1;
-                }
-            }
-            if (!found)
-            {
-                printf("Khong tim thay sinh vien!\n");
-            }
-            break;
-        case 2:
-            found = 0;
-            temp[0] = '\0';
-            int lenght = strlen(findStudent.name);
-            for (int i = 0; i < lenght ; i++)
-            {
-                findStudent.name[i] = toupper(findStudent.name[i]);
-            }
-            for (int i = 0; i < *count; i++)
-            {
-                strcpy(temp,student[i].name);
-                for (int j = 0; j < strlen(temp); j++)
-                {
-                    temp[j] = toupper(temp[j]);
-                }
-                if (strcmp(temp,findStudent.name) == 0)
-                {
-                    printf("Thong tin sinh vien thu %d : \n",i+1);
-                    printf("ID : %d\n",student[i].id);
-                    printf("Ten sinh vien : %s\n",student[i].name);
-                    printf("Tuoi : %d\n",student[i].age);
-                    printf("So Dien Thoai : %s\n",student[i].phoneNumber);
-                    found = 1;
-                }
-            }
-            if (!found)
-            {
-                printf("Khong tim thay sinh vien!\n");
-            }
-            break;
-        case 3:
-            found = 0;
-            for (int i = 0; i < *count; i++)
-            {
-                if (student[i].age == findStudent.age)
-                {
-                    printf("Thong tin sinh vien thu %d : \n",i+1);
-                    printf("ID : %d\n",student[i].id);
-                    printf("Ten sinh vien : %s\n",student[i].name);
-                    printf("Tuoi : %d\n",student[i].age);
-                    printf("So Dien Thoai : %s\n",student[i].phoneNumber);
-                }
-            }
-            if (!found)
-            {
-                printf("Khong tim thay sinh vien!\n");
-            }
-            break;
-        case 4:
-            found = 0;
-            temp[0] = '\0';
-            for (int i = 0; i < *count; i++)
-            {
-                strcpy(temp,student[i].phoneNumber);
-                if (strcmp(temp,findStudent.phoneNumber) == 0)
-                {
-                    printf("Thong tin sinh vien thu %d : \n",i+1);
-                    printf("ID : %d\n",student[i].id);
-                    printf("Ten sinh vien : %s\n",student[i].name);
-                    printf("Tuoi : %d\n",student[i].age);
-                    printf("So Dien Thoai : %s\n",student[i].phoneNumber);
-                    found = 1;
-                }
-            }
-            if (!found)
-            {
-                printf("Khong tim thay sinh vien!\n");
-            }
-            break;
+        if (students[i].id == id)
+        {
+            printf("Nhap ten moi: ");
+            getchar();
+            fgets(students[i].name, sizeof(students[i].name), stdin);
+            students[i].name[strcspn(students[i].name, "\n")] = '\0';
+            printf("Nhap tuoi moi: ");
+            scanf("%d", &students[i].age);
+
+            saveStudents(students, size, file);
+            printf("Sua thong tin sinh vien thanh cong!\n");
+            return;
+        }
     }
+    printf("Khong tim thay sinh vien voi ID: %d\n", id);
 }
 
-void sortStudent(struct Student student[], int *count,int choice){
-    struct Student temp;
-    switch (choice)
+void deleteStudent(Student students[], int *size, FILE *file)
+{
+    int id;
+    printf("Nhap ID sinh vien can xoa: ");
+    scanf("%d", &id);
+    for (int i = 0; i < *size; i++)
     {
-    case 1:
-        for (int i = 0; i < *count-1; i++) {
-            for (int j = i+1; j < *count; j++) {
-                if (strcmp(student[i].name, student[j].name) > 0) {
-                    temp = student[i];
-                    student[i] = student[j];
-                    student[j] = temp;
-                }
+        if (students[i].id == id)
+        {
+            for (int j = i; j < *size - 1; j++)
+            {
+                students[j] = students[j + 1];
+            }
+            (*size)--;
+            saveStudents(students, *size, file);
+            printf("Xoa sinh vien thanh cong!\n");
+            return;
+        }
+    }
+    printf("Khong tim thay sinh vien voi ID: %d\n", id);
+}
+
+void searchStudent(Student students[], int size)
+{
+    int id;
+    printf("Nhap ID sinh vien can tim: ");
+    scanf("%d", &id);
+    for (int i = 0; i < size; i++)
+    {
+        if (students[i].id == id)
+        {
+            printf("Thong tin sinh vien:\n");
+            printf("ID: %d, Ten: %s, Tuoi: %d\n", students[i].id, students[i].name, students[i].age);
+            return;
+        }
+    }
+    printf("Khong tim thay sinh vien voi ID: %d\n", id);
+}
+
+void sortStudents(Student students[], int size)
+{
+    for (int i = 0; i < size - 1; i++)
+    {
+        for (int j = i + 1; j < size; j++)
+        {
+            if (students[i].id > students[j].id)
+            {
+                Student temp = students[i];
+                students[i] = students[j];
+                students[j] = temp;
             }
         }
-        break;
-    case 2:
-        for (int i = 0; i < *count-1; i++) {
-            for (int j = i+1; j < *count; j++) {
-                if (strcmp(student[i].name, student[j].name) < 0) {
-                    temp = student[i];
-                    student[i] = student[j];
-                    student[j] = temp;
-                }
-            }
-        }
-        break;
     }
+    printf("Sap xep danh sach sinh vien theo ID thanh cong!\n");
 }
